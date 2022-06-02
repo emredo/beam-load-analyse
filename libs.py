@@ -10,7 +10,7 @@ class Load(object):
         self.a = a
         self.b = b
         self.c = c
-        self.dx = 0.1
+        self.dx = 0.001
         self.load_length = self.x_end - self.x_start
         self.distribution = self.load_distribution_func()
         self.area = self.calculate_area()
@@ -34,7 +34,6 @@ class Load(object):
                 x += self.dx
         else:
             distribution.append(self.function(x))
-            # distribution.append(self.function(x+self.dx))
         return distribution
 
     def integrate(self):
@@ -115,15 +114,22 @@ class Beam(object):
         shear_force = self.reaction_y
         for force in self.load_distribution_list:
             shear_force_list.append(shear_force)
-            shear_force += (force*self.dx)
+            index = self.load_distribution_list.index(force)
+            if index != 0:
+                if self.load_distribution_list[index] != 0 and self.load_distribution_list[index+1] == 0 and self.load_distribution_list[index-1] == 0:
+                    shear_force += force
+                else:
+                    shear_force += (force*self.dx)
+            else:
+                shear_force += (force * self.dx)
         return shear_force_list
 
     def bending_moment_distribution(self):
         bending_moment_list = []
-        bending_moment = self.reaction_moment
+        bending_moment = -1*self.reaction_moment
         for shear_force in self.shear_force_list:
             bending_moment_list.append(bending_moment)
-            bending_moment -= (shear_force*self.dx)
+            bending_moment += (shear_force*self.dx)
         return bending_moment_list
 
     def shear_strength_distribution(self):
@@ -152,7 +158,7 @@ class Beam(object):
         plt.title('Shear Force Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
         plt.ylabel('Force (N)',fontsize=14)
-        plt.plot(np.array(range(len(self.shear_force_list)))/100, np.array(self.shear_force_list))
+        plt.plot(np.array(range(len(self.shear_force_list)))*self.dx, np.array(self.shear_force_list))
         plt.savefig(os.path.join(path, 'shear_force.png'))
         plt.show()
 
@@ -161,7 +167,7 @@ class Beam(object):
         plt.title('Bending Moment Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
         plt.ylabel('Moment (N.mm)',fontsize=14)
-        plt.plot(np.array(range(len(self.bending_moment_list)))/100, -1*np.array(self.bending_moment_list))
+        plt.plot(np.array(range(len(self.bending_moment_list)))*self.dx, np.array(self.bending_moment_list))
         plt.savefig(os.path.join(path, 'bending_moment.png'))
         plt.show()
 
