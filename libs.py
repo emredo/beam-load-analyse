@@ -1,27 +1,7 @@
+import os.path
 import numpy as np
-import math
 import matplotlib.pyplot as plt
-
-class CalculateMoi(object):
-    def __init__(self, type):
-        self.type = type
-        if self.type == 'rectangular':
-            self.moi, self.shape = self.calculate_rectangular()
-        elif self.type == 'circular':
-            self.moi, self.shape = self.calculate_circular()
-
-    @staticmethod
-    def calculate_rectangular():
-        h = 10  #int(input("Enter the 'h' dimension of the beam (long dim): "))
-        b = 20  #int(input("Enter the 'b' dimension of the beam (short dim): "))
-        shape = (h, b)
-        return b*(h**3)/12, shape
-
-    @staticmethod
-    def calculate_circular():
-        r = 10  #int(input("Enter the 'r' dimension of the beam: "))
-        shape = (r)
-        return r**4*math.pi/4, shape
+from moi import CalculateMoi
 
 class Load(object):
     def __init__(self, x_start, x_end, a, b, c):
@@ -30,7 +10,7 @@ class Load(object):
         self.a = a
         self.b = b
         self.c = c
-        self.dx = 0.01
+        self.dx = 0.1
         self.load_length = self.x_end - self.x_start
         self.distribution = self.load_distribution_func()
         self.area = self.calculate_area()
@@ -54,6 +34,7 @@ class Load(object):
                 x += self.dx
         else:
             distribution.append(self.function(x))
+            # distribution.append(self.function(x+self.dx))
         return distribution
 
     def integrate(self):
@@ -74,7 +55,10 @@ class Load(object):
             return summary_bottom
 
     def calculate_area(self):
-        area = self.integrated_func(self.load_length) - self.integrated_func(0)
+        if self.load_length != 0:
+            area = self.integrated_func(self.load_length) - self.integrated_func(0)
+        else:
+            area = self.function(0)
         return area
 
     def calculate_centroid(self):
@@ -95,11 +79,18 @@ class Beam(object):
         self.dx = loading_list[0].dx
         self.length = length
         self.section_type = section_type
+        self.moi_calculations = CalculateMoi(self.section_type)
+        self.moi = self.moi_calculations.moi
+        self.max_y = self.moi_calculations.max_y
+        self.section_area = self.moi_calculations.section_area
+        self.qx = self.moi_calculations.qx
         self.reaction_x, self.reaction_y, self.reaction_moment = self.calculate_reactions()
         self.load_distribution_list = self.load_distribution()
         self.shear_force_list = self.shear_force_distribution()
         self.bending_moment_list = self.bending_moment_distribution()
-        self.moi_calculations = CalculateMoi(self.section_type)
+        self.tensile_strength_list = self.tensile_strength_distribution()
+        self.shear_strength_list = self.shear_strength_distribution()
+        self.max_normal_stress = max(self.bending_moment_list)*self.max_y/self.moi
 
     def calculate_reactions(self):
         reaction_x = 0
@@ -135,20 +126,59 @@ class Beam(object):
             bending_moment -= (shear_force*self.dx)
         return bending_moment_list
 
+    def shear_strength_distribution(self):
+        shear_strength_list = []
+        for shear_force in self.shear_force_list:
+            shear_strength_list.append((shear_force*self.qx)/(self.moi*self.max_y))
+        return shear_strength_list
+
     def tensile_strength_distribution(self):
         tensile_strength_list = []
         for moment in self.bending_moment_list:
             tensile_strength_list.append(moment*self.max_y/self.moi)
         return tensile_strength_list
 
-    def visualize_loading(self):
-        plt.plot(range(len(self.load_distribution_list)), -1*np.array(self.load_distribution_list))
+    def visualize_loading(self, path):
+        plt.grid()
+        plt.title('Loading Distribution',fontsize=20)
+        plt.xlabel('Distance (mm)',fontsize=14)
+        plt.ylabel('Load (N)',fontsize=14)
+        plt.plot(np.array(range(len(self.load_distribution_list)))*self.dx, -1*np.array(self.load_distribution_list))
+        plt.savefig(os.path.join(path, 'loading_distribution.png'))
         plt.show()
 
-    def visualize_shear_force(self):
-        plt.plot(range(len(self.shear_force_list)), np.array(self.shear_force_list))
+    def visualize_shear_force(self, path):
+        plt.grid()
+        plt.title('Shear Force Distribution', fontsize=20)
+        plt.xlabel('Distance (mm)',fontsize=14)
+        plt.ylabel('Force (N)',fontsize=14)
+        plt.plot(np.array(range(len(self.shear_force_list)))/100, np.array(self.shear_force_list))
+        plt.savefig(os.path.join(path, 'shear_force.png'))
         plt.show()
 
-    def visualize_bending_moment(self):
-        plt.plot(range(len(self.bending_moment_list)), -1*np.array(self.bending_moment_list))
+    def visualize_bending_moment(self, path):
+        plt.grid()
+        plt.title('Bending Moment Distribution', fontsize=20)
+        plt.xlabel('Distance (mm)',fontsize=14)
+        plt.ylabel('Moment (N.mm)',fontsize=14)
+        plt.plot(np.array(range(len(self.bending_moment_list)))/100, -1*np.array(self.bending_moment_list))
+        plt.savefig(os.path.join(path, 'bending_moment.png'))
+        plt.show()
+
+    def visualize_tensile_strength(self,path):
+        plt.grid()
+        plt.title('Tensile Strength Distribution', fontsize=20)
+        plt.xlabel('Distance (mm)',fontsize=14)
+        plt.ylabel('Strength (MPa)',fontsize=14)
+        plt.plot(np.array(range(len(self.tensile_strength_list))), np.array(self.tensile_strength_list))
+        plt.savefig(os.path.join(path,'tensile_strength.png'))
+        plt.show()
+
+    def visualize_shear_strength(self,path):
+        plt.grid()
+        plt.title('Max Shear Strength Distribution', fontsize=20)
+        plt.xlabel('Distance (mm)',fontsize=14)
+        plt.ylabel('Strength (MPa)',fontsize=14)
+        plt.plot(np.array(range(len(self.shear_strength_list))), np.array(self.shear_strength_list))
+        plt.savefig(os.path.join(path,'shear_strength.png'))
         plt.show()
