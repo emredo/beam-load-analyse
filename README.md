@@ -1,5 +1,5 @@
 # beam-load-analyse
-##Program User Guide
+## **Program User Guide**
 <section>
 <p>
 This program is designed to analyse the load of a beam, but can be used for only fixed support beams.
@@ -15,7 +15,7 @@ In order to use program, you need to specify the following parameters:
 !!!    If you want to load singular load, you need to set x_start and x_end values same.
 </section>
 
-##What you will get?
+## What you will get?
 <section>
 <p>
 The program will give you the following results:
@@ -29,7 +29,7 @@ The program will give you the following results:
 </ul>
 </section>
 
-##!!!Program is still in development!!!
+## !!!Program is still in development!!!
 <section>
 <ul>
 <li> You can't analyse torsion effects, in short this program neglects torsion effects.</li>
