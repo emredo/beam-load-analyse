@@ -33,9 +33,9 @@ class CalculateMoi(object):
         D = 10  #int(input("Enter the 'D' diameter of the beam: "))
         moi = ((D**4)*math.pi)/64
         max_y = D/2
-        qx = 100 #formulünü öğrenince yapacağız.
+        qx = 0 #formulünü öğrenince yapacağız.
         section_thickness = D
-        area = 100
+        area = math.pi*(D**2)/4
         return moi, max_y, qx, section_thickness, area
 
     @staticmethod
@@ -109,6 +109,9 @@ class CalculateMoi(object):
             max_y = b - yg
         else:
             max_y = yg
-        qx = 10
+        if yg >= c:
+            qx = a*(b-yg)*(b-yg)*0.5
+        elif yg < c:
+            qx = a*(b-c)*(b-yg-(b-c)*0.5) + e*(c-yg)*(c-yg)*0.5
         section_thickness = e
         return moi, max_y, qx, section_thickness, area

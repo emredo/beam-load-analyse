@@ -83,6 +83,7 @@ class Beam(object):
         self.max_y = self.moi_calculations.max_y
         self.section_area = self.moi_calculations.section_area
         self.qx = self.moi_calculations.qx
+        self.section_thickness = self.moi_calculations.section_thickness
         self.reaction_x, self.reaction_y, self.reaction_moment = self.calculate_reactions()
         self.load_distribution_list = self.load_distribution()
         self.shear_force_list = self.shear_force_distribution()
@@ -90,6 +91,10 @@ class Beam(object):
         self.tensile_strength_list = self.tensile_strength_distribution()
         self.shear_strength_list = self.shear_strength_distribution()
         self.max_normal_stress = max(self.bending_moment_list)*self.max_y/self.moi
+        if self.qx == 0:  # if section type is circular.
+            self.max_shear_stress = max(self.shear_force_list)/self.section_area * 3 / 2
+        else: #other section types
+            self.max_shear_stress = (max(self.shear_force_list)*self.qx)/(self.moi*self.section_thickness)
 
     def calculate_reactions(self):
         reaction_x = 0
@@ -105,7 +110,7 @@ class Beam(object):
         for loading_obj in self.loading_list:
             x = loading_obj.x_start * int(1 / self.dx)
             for diff_load in loading_obj.distribution:
-                load_list[x] = diff_load
+                load_list[x] += diff_load
                 x += 1
         return load_list
 
@@ -135,7 +140,7 @@ class Beam(object):
     def shear_strength_distribution(self):
         shear_strength_list = []
         for shear_force in self.shear_force_list:
-            shear_strength_list.append((shear_force*self.qx)/(self.moi*self.max_y))
+            shear_strength_list.append((shear_force*self.qx)/(self.moi*self.section_thickness))
         return shear_strength_list
 
     def tensile_strength_distribution(self):
@@ -176,7 +181,7 @@ class Beam(object):
         plt.title('Tensile Strength Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
         plt.ylabel('Strength (MPa)',fontsize=14)
-        plt.plot(np.array(range(len(self.tensile_strength_list))), np.array(self.tensile_strength_list))
+        plt.plot(np.array(range(len(self.tensile_strength_list)))*self.dx, np.array(self.tensile_strength_list))
         plt.savefig(os.path.join(path,'tensile_strength.png'))
         plt.show()
 
@@ -185,6 +190,6 @@ class Beam(object):
         plt.title('Max Shear Strength Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
         plt.ylabel('Strength (MPa)',fontsize=14)
-        plt.plot(np.array(range(len(self.shear_strength_list))), np.array(self.shear_strength_list))
+        plt.plot(np.array(range(len(self.shear_strength_list)))*self.dx, np.array(self.shear_strength_list))
         plt.savefig(os.path.join(path,'shear_strength.png'))
         plt.show()
