@@ -2,7 +2,7 @@ from libs import Load, Beam
 import os
 import time
 
-print("Hello, please look the user guide to understand program working logic.")
+print("\nHello, please look the user guide to understand program working logic.")
 while True:
     try:
         beam_length = int(float(input("Please enter the beam length in milimeter: ")))
@@ -16,11 +16,11 @@ while True:
     if beam_section_type in ["rectangular", "circular", "i_section", "h_section", "t_section"]:
         break
     else:
-        print("\nPlease enter a valid beam section type.\n")
+        print("Please enter a valid beam section type.")
 
 loads = []
 while True:
-    print(50*"*")
+    print("\n",50*"*")
     operation = input("\nPlease press any key to continue entering loading properties. Don't forget, the loading must be in N/mm. \nIf you finished entering load data, plese tpye 'done':\t")
     if operation == "done":
         break
@@ -66,5 +66,5 @@ os.mkdir(path)
 beam.visualize_loading(path)
 beam.visualize_shear_force(path)
 beam.visualize_bending_moment(path)
-beam.visualize_tensile_strength(path)
-beam.visualize_shear_strength(path)
+beam.visualize_tensile_stress(path)
+beam.visualize_shear_stress(path)
