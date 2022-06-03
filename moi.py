@@ -1,8 +1,8 @@
 import math
 
 class CalculateMoi(object):
-    def __init__(self, type):
-        self.type = type
+    def __init__(self, section_type):
+        self.type = section_type
         if self.type == 'rectangular':
             self.moi, self.max_y, self.qx, self.section_thickness, self.section_area = self.calculate_rectangular()
         elif self.type == 'circular':
@@ -18,8 +18,8 @@ class CalculateMoi(object):
 
     @staticmethod
     def calculate_rectangular():
-        a = 10  #int(input("Enter the 'h' dimension of the beam (long dim): "))
-        b = 20  #int(input("Enter the 'b' dimension of the beam (short dim): "))
+        a = int(float(input("Enter the 'a' dimension of the beam (long dim) in mm: ")))
+        b = int(float(input("Enter the 'b' dimension of the beam (short dim) in mm: ")))
         yx = b/2
         moi = a*(b**3)/12
         max_y = b-yx
@@ -30,22 +30,23 @@ class CalculateMoi(object):
 
     @staticmethod
     def calculate_circular():
-        D = 10  #int(input("Enter the 'D' diameter of the beam: "))
+        D = int(float(input("Enter the 'D' diameter of the beam in mm: ")))
         moi = ((D**4)*math.pi)/64
         max_y = D/2
-        qx = 0 #formulünü öğrenince yapacağız.
-        section_thickness = D
+        yx = (2*D)/(3*math.pi)
         area = math.pi*(D**2)/4
+        qx = yx*area
+        section_thickness = D
         return moi, max_y, qx, section_thickness, area
 
     @staticmethod
     def calculate_i_profile():
-        a = 6
-        b = 12
-        c = 2
-        d = 1
-        e = 4
-        f = 6
+        a = int(float(input("Enter the 'a' dimension of the section in mm:\t")))
+        b = int(float(input("Enter the 'b' dimension of the section in mm:\t")))
+        c = int(float(input("Enter the 'c' dimension of the section in mm:\t")))
+        d = int(float(input("Enter the 'd' dimension of the section in mm:\t")))
+        e = int(float(input("Enter the 'e' dimension of the section in mm:\t")))
+        f = int(float(input("Enter the 'f' dimension of the section in mm:\t")))
         m = a-c-d
         n = b-e-f
         area = b*c + b*d * m*n
@@ -67,12 +68,12 @@ class CalculateMoi(object):
 
     @staticmethod
     def calculate_h_profile():
-        a= 6
-        b= 12
-        c= 2
-        d= 1
-        e= 4
-        f= 6
+        a= int(float(input("Enter the 'a' dimension of the section in mm:\t")))
+        b= int(float(input("Enter the 'b' dimension of the section in mm:\t")))
+        c= int(float(input("Enter the 'c' dimension of the section in mm:\t")))
+        d= int(float(input("Enter the 'd' dimension of the section in mm:\t")))
+        e= int(float(input("Enter the 'e' dimension of the section in mm:\t")))
+        f= int(float(input("Enter the 'f' dimension of the section in mm:\t")))
         m = a-c-d
         n = b-e-f
 
@@ -85,7 +86,7 @@ class CalculateMoi(object):
         else:
             max_y = yg
 
-        if yg> n+f:
+        if yg > n+f:
             qx = (c+d)*(b-yg)*(b-yg)*0.5
         elif f < yg < f+n:
             qx = (c+d)*e*(b-yg) + a*(b-yg-e)*(b-yg-e)*0.5
@@ -96,11 +97,11 @@ class CalculateMoi(object):
 
     @staticmethod
     def calculate_t_profile():
-        a = 3
-        b = 5
-        c = 4
-        d = 1
-        e = 1
+        b = int(float(input("Enter the 'b' dimension of the section in mm:\t")))
+        c = int(float(input("Enter the 'c' dimension of the section in mm:\t")))
+        d = int(float(input("Enter the 'd' dimension of the section in mm:\t")))
+        a = int(float(input("Enter the 'a' dimension of the section in mm:\t")))
+        e = int(float(input("Enter the 'e' dimension of the section in mm:\t")))
 
         area = a*(b-c) + c*e
         yg = (a*(b-c)*(c+(b-c)/2)+c**2*e/2)/area
@@ -111,7 +112,7 @@ class CalculateMoi(object):
             max_y = yg
         if yg >= c:
             qx = a*(b-yg)*(b-yg)*0.5
-        elif yg < c:
+        else:
             qx = a*(b-c)*(b-yg-(b-c)*0.5) + e*(c-yg)*(c-yg)*0.5
         section_thickness = e
         return moi, max_y, qx, section_thickness, area
