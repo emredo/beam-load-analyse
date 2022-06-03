@@ -186,16 +186,16 @@ class Beam(object):
 
     def visualize_tensile_stress(self,path):
         plt.grid()
-        plt.title('Tensile stress Distribution', fontsize=20)
+        plt.title('Tensile Stress Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
         plt.ylabel('stress (MPa)',fontsize=14)
-        plt.plot(np.array(range(len(self.tensile_stress_list)))*self.dx, np.array(self.tensile_stress_list))
+        plt.plot(np.array(range(len(self.tensile_stress_list)))*self.dx, -1*np.array(self.tensile_stress_list))
         plt.savefig(os.path.join(path,'tensile_stress.png'))
         plt.show()
 
     def visualize_shear_stress(self,path):
         plt.grid()
-        plt.title('Max Shear stress Distribution', fontsize=20)
+        plt.title('Max Shear Stress Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
         plt.ylabel('stress (MPa)',fontsize=14)
         plt.plot(np.array(range(len(self.shear_stress_list)))*self.dx, np.array(self.shear_stress_list))

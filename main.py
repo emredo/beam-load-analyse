@@ -46,13 +46,13 @@ beam_safety_tensile_stress = int(float(input("Please enter the safety tensile st
 beam_safety_coef = int(float(input("Please enter the safety coefficient: ")))
 
 print("\nBEAM PROPERTIES\nMoment of Inertia (mm^4): {}\nArea (mm^2): {}\nBeam length (mm): {}\nSection type: {}\n".format(beam.moi,beam.section_area,beam.length,beam.section_type))
-print("\nREACTION VALUES\nReaction X in (N):\t{}\nReaction Y in (N):\t{}\nReaction Moment (N.mm):\t{}\nMaximum normal stress (N/mm^2):\t{}\nMaximum shear stress (N/mm^2):\t".format(beam.reaction_x,
+print("\nREACTION VALUES\nReaction X in (N):\t{}\nReaction Y in (N):\t{}\nReaction Moment (N.mm):\t{}\nMaximum normal stress (N/mm^2):\t{}\nMaximum shear stress (N/mm^2):\t{}".format(beam.reaction_x,
                                                                             beam.reaction_y,
                                                                             beam.reaction_moment,beam.max_normal_stress,beam.max_shear_stress))
 if beam_safety_shear_stress < beam_safety_coef * beam.max_shear_stress:
-    print("\nWARNING: Maximum shear stress is higher than safety shear stress.\n")
+    print("\nWARNING: Maximum shear stress is higher than safety shear stress.")
 else:
-    print("\nMaximum shear stress is lower than safety shear stress.\n")
+    print("Maximum shear stress is lower than safety shear stress.\n")
 
 if beam_safety_tensile_stress < beam_safety_coef * beam.max_normal_stress:
     print("\nWARNING: Maximum normal stress is higher than safety tensile stress.\n")
