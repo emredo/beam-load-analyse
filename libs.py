@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from moi import CalculateMoi
 
+#Load class for manipulating load data. Object attributes can be used for plotting or other calculations.
 class Load(object):
     def __init__(self, x_start, x_end, a, b, c):
         self.x_start = x_start
@@ -72,13 +73,17 @@ class Load(object):
         else:
             return self.x_start
 
+#Beam class includes all the attributes and methods for a single beam.
 class Beam(object):
     def __init__(self, loading_list, length, section_type):
         self.loading_list = loading_list
         self.dx = loading_list[0].dx
         self.length = length
         self.section_type = section_type
-        self.moi_calculations = CalculateMoi(self.section_type)
+        try:
+            self.moi_calculations = CalculateMoi(self.section_type)
+        except:
+            assert True, "Wrong section shapes, exiting program. Try again."
         self.moi = self.moi_calculations.moi
         self.max_y = self.moi_calculations.max_y
         self.section_area = self.moi_calculations.section_area
@@ -88,8 +93,8 @@ class Beam(object):
         self.load_distribution_list = self.load_distribution()
         self.shear_force_list = self.shear_force_distribution()
         self.bending_moment_list = self.bending_moment_distribution()
-        self.tensile_strength_list = self.tensile_strength_distribution()
-        self.shear_strength_list = self.shear_strength_distribution()
+        self.tensile_stress_list = self.tensile_stress_distribution()
+        self.shear_stress_list = self.shear_stress_distribution()
         self.max_normal_stress = max(self.bending_moment_list)*self.max_y/self.moi
         if self.qx == 0:  # if section type is circular.
             self.max_shear_stress = max(self.shear_force_list)/self.section_area * 3 / 2
@@ -105,6 +110,7 @@ class Beam(object):
             moment -= loading_obj.centroid * loading_obj.area
         return reaction_x, reaction_y, moment
 
+    ######################      Load and cutting reactions distributions    ###################
     def load_distribution(self):
         load_list = (self.length * int(1 / self.dx) + 1) * [0]
         for loading_obj in self.loading_list:
@@ -137,18 +143,20 @@ class Beam(object):
             bending_moment += (shear_force*self.dx)
         return bending_moment_list
 
-    def shear_strength_distribution(self):
+    ######################      Stress distributions    ###################
+    def shear_stress_distribution(self):
         shear_strength_list = []
         for shear_force in self.shear_force_list:
             shear_strength_list.append((shear_force*self.qx)/(self.moi*self.section_thickness))
         return shear_strength_list
 
-    def tensile_strength_distribution(self):
+    def tensile_stress_distribution(self):
         tensile_strength_list = []
         for moment in self.bending_moment_list:
             tensile_strength_list.append(moment*self.max_y/self.moi)
         return tensile_strength_list
 
+######################      Visualization section    ###################
     def visualize_loading(self, path):
         plt.grid()
         plt.title('Loading Distribution',fontsize=20)
@@ -176,20 +184,20 @@ class Beam(object):
         plt.savefig(os.path.join(path, 'bending_moment.png'))
         plt.show()
 
-    def visualize_tensile_strength(self,path):
+    def visualize_tensile_stress(self,path):
         plt.grid()
-        plt.title('Tensile Strength Distribution', fontsize=20)
+        plt.title('Tensile stress Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
-        plt.ylabel('Strength (MPa)',fontsize=14)
-        plt.plot(np.array(range(len(self.tensile_strength_list)))*self.dx, np.array(self.tensile_strength_list))
-        plt.savefig(os.path.join(path,'tensile_strength.png'))
+        plt.ylabel('stress (MPa)',fontsize=14)
+        plt.plot(np.array(range(len(self.tensile_stress_list)))*self.dx, np.array(self.tensile_stress_list))
+        plt.savefig(os.path.join(path,'tensile_stress.png'))
         plt.show()
 
-    def visualize_shear_strength(self,path):
+    def visualize_shear_stress(self,path):
         plt.grid()
-        plt.title('Max Shear Strength Distribution', fontsize=20)
+        plt.title('Max Shear stress Distribution', fontsize=20)
         plt.xlabel('Distance (mm)',fontsize=14)
-        plt.ylabel('Strength (MPa)',fontsize=14)
-        plt.plot(np.array(range(len(self.shear_strength_list)))*self.dx, np.array(self.shear_strength_list))
-        plt.savefig(os.path.join(path,'shear_strength.png'))
+        plt.ylabel('stress (MPa)',fontsize=14)
+        plt.plot(np.array(range(len(self.shear_stress_list)))*self.dx, np.array(self.shear_stress_list))
+        plt.savefig(os.path.join(path,'shear_stress.png'))
         plt.show()
