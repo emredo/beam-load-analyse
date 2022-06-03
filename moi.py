@@ -23,7 +23,7 @@ class CalculateMoi(object):
         yx = b/2
         moi = a*(b**3)/12
         max_y = b-yx
-        qx = 10
+        qx = a*(b-yx)*b*0.25
         section_thickness = a
         area = a*b
         return moi, max_y, qx, section_thickness, area
